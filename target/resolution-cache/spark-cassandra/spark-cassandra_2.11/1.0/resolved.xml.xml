@@ -4,7 +4,7 @@
 		module="spark-cassandra_2.11"
 		revision="1.0"
 		status="integration"
-		publication="20161211121527"
+		publication="20161211122035"
 	>
 		<description>
 		spark-cassandra

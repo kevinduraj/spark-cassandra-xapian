@@ -19392,7 +19392,7 @@
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.joda#joda-convert;1.2!joda-convert.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] com.twitter#jsr166e;1.1.0!jsr166e.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] jline#jline;2.12.1!jline.jar[0m
-[0m[[0mdebug[0m] [0m:: resolution report :: resolve 4791ms :: artifacts dl 112ms[0m
+[0m[[0mdebug[0m] [0m:: resolution report :: resolve 4686ms :: artifacts dl 99ms[0m
 [0m[[0mdebug[0m] [0m	report for spark-cassandra#spark-cassandra_2.11;1.0 compile produced in /home/xapian/spark-cassandra-xapian/target/resolution-cache/reports/spark-cassandra-spark-cassandra_2.11-compile.xml[0m
 [0m[[0mdebug[0m] [0m	report for spark-cassandra#spark-cassandra_2.11;1.0 runtime produced in /home/xapian/spark-cassandra-xapian/target/resolution-cache/reports/spark-cassandra-spark-cassandra_2.11-runtime.xml[0m
 [0m[[0mdebug[0m] [0m	report for spark-cassandra#spark-cassandra_2.11;1.0 test produced in /home/xapian/spark-cassandra-xapian/target/resolution-cache/reports/spark-cassandra-spark-cassandra_2.11-test.xml[0m
@@ -19406,5 +19406,5 @@
 [0m[[0mdebug[0m] [0m	report for spark-cassandra#spark-cassandra_2.11;1.0 docs produced in /home/xapian/spark-cassandra-xapian/target/resolution-cache/reports/spark-cassandra-spark-cassandra_2.11-docs.xml[0m
 [0m[[0mdebug[0m] [0m	report for spark-cassandra#spark-cassandra_2.11;1.0 pom produced in /home/xapian/spark-cassandra-xapian/target/resolution-cache/reports/spark-cassandra-spark-cassandra_2.11-pom.xml[0m
 [0m[[0mdebug[0m] [0m	report for spark-cassandra#spark-cassandra_2.11;1.0 scala-tool produced in /home/xapian/spark-cassandra-xapian/target/resolution-cache/reports/spark-cassandra-spark-cassandra_2.11-scala-tool.xml[0m
-[0m[[0mdebug[0m] [0m	resolve done (4791ms resolve - 112ms download)[0m
+[0m[[0mdebug[0m] [0m	resolve done (4686ms resolve - 99ms download)[0m
 [0m[[0minfo[0m] [0mDone updating.[0m

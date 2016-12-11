@@ -68,14 +68,17 @@ object YoutubeVideos {
         df1.createOrReplaceTempView("video")
 
         //val df2 = spark.sql("SELECT video_id, video_title, ts_data_update FROM video WHERE ts_data_update <= '2016-12-04 00:00:00+0000'")
-        val df2 = spark.sql("SELECT * FROM video WHERE ts_stats_update IS NOT NULL LIMIT 100")
+        val df2 = spark.sql("SELECT  video_id, channel_id, channel_text, channel_title, duration, stats_comments, stats_dislikes, 
+                                    stats_favorite, stats_likes, stats_views, topics, topics_relevant, ts_video_published, 
+                                    video_category_id, video_language, video_seconds, video_tags, video_text, video_title
+                             FROM video WHERE ts_stats_update IS NOT NULL LIMIT 100")
         println("NULL = " + df2.count())
-        df2.show(25, false)
+        df2.show(25, true)
 
         //df2.write.format("org.apache.spark.sql.cassandra").options(Map("keyspace" -> "youtube", "table" -> "video1")).mode("append").save()
 
-        val df3 = df2.coalesce(1)
-        df3.write.format("com.databricks.spark.csv").mode(SaveMode.Overwrite).save("/home/xapian/video_data")
+        //val df3 = df2.coalesce(1)
+        //df3.write.format("com.databricks.spark.csv").mode(SaveMode.Overwrite).save("/home/xapian/video_data")
 
     }
 
