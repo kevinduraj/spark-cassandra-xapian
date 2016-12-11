@@ -81,14 +81,6 @@ object YoutubeVideos {
                             
                    } )
 
-
-
-                        //println("NULL = " + df2.count())
-                        //df2.show(25, true)
-                        //df2.write.format("org.apache.spark.sql.cassandra").options(Map("keyspace" -> "youtube", "table" -> "video1")).mode("append").save()
-                        //val df3 = df2.coalesce(1)
-                        //df3.write.format("com.databricks.spark.csv").mode(SaveMode.Overwrite).save("/home/xapian/video_data")
-
     }
 
 }
