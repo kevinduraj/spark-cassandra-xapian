@@ -40,7 +40,7 @@ object YoutubeVideos {
     /*--------------------------------------------------------------*/
     def main(args: Array[String]) {
 
-        val output_prefix   = args(3); println("output_prefix=" + output_prefix)
+        val output_prefix   = args(1); println("output_prefix=" + output_prefix)
 
         /*--- Open 100 ranked batchFiles with append flag set to true, ---*/
         for(io <- 0 to 200) { batchFiles +=  new BufferedWriter(new FileWriter(new File(output_prefix + "/video_" + io +".dat"), true)) }
@@ -55,12 +55,9 @@ object YoutubeVideos {
         for(ic <- 0 to 200) { batchFiles(ic).close() }
     }
     /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
-    val user_defined_function = udf(( published_at:   String, 
+    val user_defined_function = udf(( 
+                published_at:   String, 
                 duration:       String,
-                drugsAlcohol:   String,
-                scoreLanguage:  String,
-                sexualContent:  String,
-                scoreViolence:  String,
                 scoreLikes:     String,
                 scoreViews:     String ) => { 
 
@@ -190,16 +187,15 @@ object YoutubeVideos {
         val spark = SparkSession.builder().appName("YoutubeVideos").config("spark.some.config.option", "some-value").getOrCreate()
             import spark.implicits._
 
-            val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load()
+            val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load().toDF()
             df1.printSchema()
-            df1.createOrReplaceTempView("video")
+//            df1.createOrReplaceTempView("video")
 
-            //val df2 = spark.sql("SELECT video_id, video_title, ts_data_update FROM video WHERE ts_data_update <= '2016-12-04 00:00:00+0000'")
-            val video1 = spark.sql("SELECT  video_id, channel_id, channel_text, channel_title, duration, stats_comments, stats_dislikes, stats_favorite," +
-                    " stats_likes, stats_views, topics, topics_relevant, ts_video_published, video_category_id, video_language, " +
-                    " video_seconds, video_tags, video_text, video_title FROM video WHERE ts_stats_update IS NOT NULL LIMIT 25")
+//            val video1 = spark.sql("SELECT  video_id, channel_id, channel_text, channel_title, duration, stats_comments, stats_dislikes, stats_favorite," +
+//                    " stats_likes, stats_views, topics, topics_relevant, ts_video_published, video_category_id, video_language, " +
+//                    " video_seconds, video_tags, video_text, video_title FROM video").toDF()
 
-            val video2 = video1.withColumn("hashtags", user_defined_function (
+            val video2 = df1.withColumn("hashtags", user_defined_function (
                         col("ts_video_published"), 
                         col("duration"), 
                         col("stats_likes"),
