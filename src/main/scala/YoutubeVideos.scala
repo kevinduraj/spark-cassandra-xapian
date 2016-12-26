@@ -8,12 +8,12 @@ import java.io.PrintWriter
 import java.text.{SimpleDateFormat};
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
-import java.util.Calendar
-import java.util.{Date}
+import java.util.{Calendar, Date}
 
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark._
 import org.apache.spark.rdd.RDD
+
 import org.apache.spark.sql._
 import org.apache.spark.sql.cassandra._
 import org.apache.spark.sql.Encoder
