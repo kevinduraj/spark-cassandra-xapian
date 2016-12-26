@@ -1,13 +1,15 @@
 #!/bin/bash
 #-----------------------------------------------------------------------------------#
+OUTPUT_PREFIX='/data/raw'
+
+#-----------------------------------------------------------------------------------#
   if [ "$1" == "0" ] 2>/dev/null; then
     echo "sbt clean && sbt package"
     sbt clean && sbt package
-    #mvn clean install
-    #mvn clean compile assembly:single
 
 #-----------------------------------------------------------------------------------#
 elif [ "$1" == "1" ] 2>/dev/null; then
+echo "$(date +"%Y-%m-%d %H:%M") - SPARK JOB1 STARTED" >> spark.log
 
 spark-submit                                        \
   --class "YoutubeVideos"                           \
@@ -15,8 +17,10 @@ spark-submit                                        \
   --driver-memory   32G                             \
   --executor-memory 16G                             \
   target/scala-2.11/spark-cassandra_2.11-1.0.jar    \
-  "export_data"
+  "export_data"                                     \
+  $OUTPUT_PREFIX 
 
+echo "$(date +"%Y-%m-%d %H:%M") - SPARK JOB1 ENDED" >> spark.log
 #-----------------------------------------------------------------------------------#
 else
 
