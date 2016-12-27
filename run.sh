@@ -1,7 +1,7 @@
 #!/bin/bash
 #-----------------------------------------------------------------------------------#
-#  --master local[16]                               \
 #  --master spark://69.13.39.34:7077                \
+#  --master local[16]                               \
 #  --driver-memory   32G                            \
 #  --executor-memory 16G                            \
 #-----------------------------------------------------------------------------------#
@@ -17,9 +17,11 @@ rm -fR $OUTPUT_PREFIX
 mkdir -p $OUTPUT_PREFIX
 echo "$(date +"%Y-%m-%d %H:%M") - SPARK JOB1 STARTED" > spark.log
 
-spark-submit                                        \
+time spark-submit                                   \
   --class "YoutubeVideos"                           \
-  --master spark://69.13.39.34:7077                 \
+  --master local[16]                                \
+  --driver-memory   32g                             \
+  --executor-memory 4g                              \
   target/scala-2.11/spark-cassandra_2.11-1.0.jar    \
   "export_data"                                     \
   $OUTPUT_PREFIX 
