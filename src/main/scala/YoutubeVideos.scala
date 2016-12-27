@@ -63,9 +63,11 @@ object YoutubeVideos {
         sqrt.toInt
       else
         0
-    }    
+    }
+    def isEmpty(x: String) = x == null || x.isEmpty
     /*----------------------------------------------------------------------------------------------------------------------------*/
     val user_defined_function = udf(( 
+                video_title:    String, 
                 published_at:   String, 
                 scoreLikes:     String, 
                 scoreDislikes:  String, 
@@ -78,54 +80,60 @@ object YoutubeVideos {
             var total_rank    = 0
             var absolute_rank = 0
 
-            try {
-                val beginDate   = published_at.toString.take(10)                                                                                                                                                                               
-                val dateFormat  = new SimpleDateFormat("yyyy-MM-dd");
-                val date        = new Date();
-                val currentDate = dateFormat.format(date)
+            if(!isEmpty(video_title)) {
+                try {
+                    val beginDate   = published_at.toString.take(10)                                                                                                                                                                               
+                    val dateFormat  = new SimpleDateFormat("yyyy-MM-dd");
+                    val date        = new Date();
+                    val currentDate = dateFormat.format(date)
 
-                val formatter   = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                val oldDate     = LocalDate.parse(beginDate, formatter)
-                val newDate     = LocalDate.parse(currentDate, formatter)
-                period          = newDate.toEpochDay() - oldDate.toEpochDay()
+                    val formatter   = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                    val oldDate     = LocalDate.parse(beginDate, formatter)
+                    val newDate     = LocalDate.parse(currentDate, formatter)
+                    period          = newDate.toEpochDay() - oldDate.toEpochDay()
 
-                if(period > (365*3))      { resPeriod = "over3years";           }   
-                else if(period > (365*2)) { resPeriod = "up3years";             }   
-                else if(period > (365))   { resPeriod = "up2years up3years";    }   
-                else                      { resPeriod = "up1year up3years";     }   
+                    if(period > (365*3))      { resPeriod = "over3years";           }   
+                    else if(period > (365*2)) { resPeriod = "up3years";             }   
+                    else if(period > (365))   { resPeriod = "up2years up3years";    }   
+                    else                      { resPeriod = "up1year up3years";     }   
 
-                if(period <= 30)          { resPeriod = resPeriod + " up1month" }
-                if(period <= 14)          { resPeriod = resPeriod + " up2weeks" }
-                if(period <= 7)           { resPeriod = resPeriod + " up1week"  }
+                    if(period <= 30)          { resPeriod = resPeriod + " up1month" }
+                    if(period <= 14)          { resPeriod = resPeriod + " up2weeks" }
+                    if(period <= 7)           { resPeriod = resPeriod + " up1week"  }
    
-                /* days: 
-                         (365 * 1)  / 200 = 1.825 |  200 - (1000 / 1.825)  = -347 
-                         (365 * 2)  / 200 = 3.65  |  200 - (1000 / 3.65)   = - 73 
-                         (365 * 3)  / 200 = 5.475 |  200 - (1000 / 5.475)  =   17 
-                         (365 * 5)  / 200 = 9.125 |  200 - (1000 / 9.125)  =   90
-                         (365 * 10) / 200 = 18.25 |  200 - (1000 / 18.25 ) =  145
-                */
-                total_rank = 200 - ( period.toInt / 3 ) 
+                    /* days: 
+                             (365 * 1)  / 200 = 1.825 |  200 - (1000 / 1.825)  = -347 
+                             (365 * 2)  / 200 = 3.65  |  200 - (1000 / 3.65)   = - 73 
+                             (365 * 3)  / 200 = 5.475 |  200 - (1000 / 5.475)  =   17 
+                             (365 * 5)  / 200 = 9.125 |  200 - (1000 / 9.125)  =   90
+                             (365 * 10) / 200 = 18.25 |  200 - (1000 / 18.25 ) =  145
+                    */
+                    total_rank = 200 - ( period.toInt / 3 ) 
 
-                /* views: 
-                        
-                */
-                total_rank += scoreViews.toInt   / 1000 
-                total_rank += scoreLikes.toInt   / 200 
-                total_rank -= scoreDislikes.toInt / 100
+                    /* views: 
+                            
+                    */
+                    total_rank += scoreViews.toInt   / 1000 
+                    total_rank += scoreLikes.toInt   / 200 
+                    total_rank -= scoreDislikes.toInt / 100
 
-                absolute_rank = total_rank
+                    absolute_rank = total_rank
 
-            } catch { case e: Exception => { resPeriod = "over3years" } } 
+                } catch { case e: Exception => { resPeriod = "over3years" } } 
 
-            /*--------------------- [ Normalize Result ] -----------------------------*/
-            val random  = scala.util.Random
-            try {
-                //if(total_rank <  10) { total_rank = random.nextInt(10)        }
-                if(total_rank > 199) { total_rank = 191 + random.nextInt(10)  }
-            } catch {  case e: Exception => { total_rank = random.nextInt(10)  }  }
+                /*--------------------- [ Normalize Result ] -----------------------------*/
+                val random  = scala.util.Random
+                try {
+                    if(total_rank <  10) { total_rank = random.nextInt(10)        }
+                    if(total_rank > 199) { total_rank = 191 + random.nextInt(10)  }
+                } catch {  case e: Exception => { total_rank = random.nextInt(10) }  }
+                
+                "xrank" + total_rank.toInt.toString() + " " +  resPeriod + " days" + period.toInt.toString() + " absolute" + absolute_rank.toInt.toString()
 
-            "xrank" + total_rank.toInt.toString() + " " +  resPeriod + " days" + period.toInt.toString() + " absolute" + absolute_rank.toInt.toString()
+            } else {
+                "xrank0 over3years days0 absolute0"
+            }
+
     })
 
     /*---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -168,16 +176,15 @@ object YoutubeVideos {
 
         val pattern = new Regex("hashtags=\\w+ \\w+ \\w+")
 
-        val warehouseLocation = "file:${system:user.dir}/spark-warehouse"
+        //val warehouseLocation = "file:${system:user.dir}/spark-warehouse"
+        val warehouseLocation = "file:/tmp/spark-warehouse"
         val spark = SparkSession.builder().appName("YoutubeVideos").config("spark.sql.warehouse.dir", warehouseLocation).getOrCreate()
             spark.conf.set("spark.driver.maxResultSize", "32g")
             //spark.conf.set("spark.kryoserializer.buffer.max","64m")
             //spark.conf.set("spark.executor.memory", "4g")
             import spark.implicits._
 
-            //val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load()
             val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load().toDF()
-            //val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" ))
             //val df2 = df1.filter(df1.col("video_title").isNotNull())
             df1.printSchema()
 
@@ -187,6 +194,7 @@ object YoutubeVideos {
                     " video_seconds, video_tags, video_text FROM video WHERE video_title IS NOT NULL LIMIT 100").toDF() */
 
             val video = df1.withColumn("hashtags", user_defined_function (
+                        col("video_title"), 
                         col("ts_video_published"), 
                         col("stats_likes"),
                         col("stats_dislikes"),
@@ -196,9 +204,9 @@ object YoutubeVideos {
             //https://spark.apache.org/docs/2.0.0/api/java/org/apache/spark/sql/Row.html
             video.map(t =>  
                     "video_id="             + t.getAs[String]("video_id")                       + "\n" + 
-                    "video_title="          + ( if(t.isNullAt(32)) "missing title" else t(32) ) + "\n" +                   
-                    "video_text="           + ( if(t.isNullAt(31)) "missing description" else t.getAs[String]("video_text").replaceAll("(\\t|\\R|\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") ) + "\n" +
-                    "video_tags="           + ( if(t.isNullAt(30)) "missing tags" else t.getAs[String]("video_tags").replaceAll("(\\[|\\])", " ") ) + "\n" +
+                    "video_title="          + ( if(t.isNullAt(32)) "abc" else t(32) ) + "\n" +                   
+                    "video_text="           + ( if(t.isNullAt(31)) "null" else t.getAs[String]("video_text").replaceAll("(\\t|\\R|\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") ) + "\n" +
+                    "video_tags="           + ( if(t.isNullAt(30)) "null" else t.getAs[String]("video_tags").replaceAll("(\\[|\\])", " ") ) + "\n" +
                     "stats_likes="          + ( if(t.isNullAt(19)) "0" else t(19) ) + "\n" +                   
                     "stats_dislikes="       + ( if(t.isNullAt(17)) "0" else t(17) ) + "\n" +                   
                     "stats_views="          + ( if(t.isNullAt(20)) "0" else t(20) ) + "\n" +                   
