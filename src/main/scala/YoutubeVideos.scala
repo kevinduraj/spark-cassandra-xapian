@@ -109,8 +109,8 @@ object YoutubeVideos {
                 /* views: 
                         
                 */
-                total_rank += scoreViews.toInt / 100 
-                total_rank += scoreLikes.toInt / 50
+                total_rank += scoreViews.toInt / 200 
+                total_rank += scoreLikes.toInt / 100 
                 absolute_rank = total_rank
 
             } catch { case e: Exception => { resPeriod = "over3years" } } 
@@ -194,7 +194,7 @@ object YoutubeVideos {
                     "stats_likes="          + ( if(t.isNullAt(19)) "0" else t(19) ) + "\n" +                   
                     "stats_views="          + ( if(t.isNullAt(20)) "0" else t(20) ) + "\n" +                   
                     "video_seconds="        + ( if(t.isNullAt(29)) "0" else t(29) ) + "\n" +                   
-                    "ts_video_published="   + ( if(t.isNullAt(25)) "0" else t(25) ) + "\n" +                   
+                    "ts_video_published="   + ( if(t.isNullAt(25)) "2000-01-01" else t(25).toString.take(10)  ) + "\n" +                   
                     "hashtags="             + t.getAs[String]("hashtags")           + "\n" 
                     ).collect().map(_.trim).foreach( row => { 
 
