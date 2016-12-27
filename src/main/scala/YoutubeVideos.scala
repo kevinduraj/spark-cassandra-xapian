@@ -95,13 +95,17 @@ object YoutubeVideos {
                 if(period <= 14)          { resPeriod = resPeriod + " up2weeks" }
                 if(period <= 7)           { resPeriod = resPeriod + " up1week"  }
     
-                total_rank = TOTAL_INDEXES - squareRoot(period.toInt + scoreLikes.toInt + scoreViews.toInt) 
+                total_rank = TOTAL_INDEXES - squareRoot(period.toInt + (scoreLikes.toInt/10) + (scoreViews.toInt/10)) 
 
             } catch { case e: Exception => { resPeriod = "over3years" } } 
 
             /*--------------------- [ Normalize Result ] -----------------------------*/
-            //val random  = scala.util.Random
-            //var total_rank = random.nextInt(10)
+            try {
+                val random  = scala.util.Random
+                if(total_rank <  10) { total_rank = random.nextInt(10)        }
+                if(total_rank > 200) { total_rank = 191 + random.nextInt(10)  }
+            } catch {  case e: Exception => { totalRank = random.nextInt(10)  }  }
+
             "xrank" + total_rank.toInt.toString() + " " +  resPeriod + " days" + period.toInt.toString() + " "
     })
 
