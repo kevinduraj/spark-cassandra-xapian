@@ -95,7 +95,7 @@ object YoutubeVideos {
                 if(period <= 14)          { resPeriod = resPeriod + " up2weeks" }
                 if(period <= 7)           { resPeriod = resPeriod + " up1week"  }
     
-                total_rank = TOTAL_INDEXES - squareRoot(period.toInt + scoreLikes + scoreViews) 
+                total_rank = TOTAL_INDEXES - squareRoot(period.toInt + scoreLikes.toInt + scoreViews.toInt) 
 
             } catch { case e: Exception => { resPeriod = "over3years" } } 
 
@@ -170,7 +170,7 @@ object YoutubeVideos {
                     "video_id="         + t.getAs[String]("video_id")                       + "\n" + 
                     "video_title="      + ( if(t.isNullAt(32)) "missing title" else t(32) ) + "\n" +                   
                     "video_text="       + ( if(t.isNullAt(31)) "missing description" else t.getAs[String]("video_text").replaceAll("(\\t|\\R|\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") ) + "\n" +
-                    "video_tags="       + ( if(t.isNullAt(30)) "missing tags" else t.getAs[String]("video_tags").replaceAll("(\\[|\\])") ) + "\n" +
+                    "video_tags="       + ( if(t.isNullAt(30)) "missing tags" else t.getAs[String]("video_tags").replaceAll("(\\[|\\])", " ") ) + "\n" +
                     "stats_likes="      + ( if(t.isNullAt(19)) "0" else t(19) ) + "\n" +                   
                     "stats_views="      + ( if(t.isNullAt(20)) "0" else t(20) ) + "\n" +                   
                     "video_seconds="    + ( if(t.isNullAt(29)) "0" else t(29) ) + "\n" +                   
