@@ -94,8 +94,13 @@ object YoutubeVideos {
                 if(period <= 30)          { resPeriod = resPeriod + " up1month" }
                 if(period <= 14)          { resPeriod = resPeriod + " up2weeks" }
                 if(period <= 7)           { resPeriod = resPeriod + " up1week"  }
-    
-                total_rank = TOTAL_INDEXES - squareRoot(period.toInt + (scoreLikes.toInt/10) + (scoreViews.toInt/10)) 
+   
+                //days: (365 * 5) / 200 = 9.125 
+                total_rank = 200 - ( period.toInt / 9 ) 
+
+                //views: (10000 ) / 200 = 50
+                total_rank += scoreViews.toInt / 50
+                total_rank += scoreLikes.toInt / 50
 
             } catch { case e: Exception => { resPeriod = "over3years" } } 
 
