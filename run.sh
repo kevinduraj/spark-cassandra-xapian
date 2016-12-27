@@ -1,9 +1,9 @@
 #!/bin/bash
 #-----------------------------------------------------------------------------------#
-OUTPUT_PREFIX='/home/data/2'
-rm -fR $OUTPUT_PREFIX
-sleep 1
-mkdir -p $OUTPUT_PREFIX
+#  --master local[16]                               \
+#  --master spark://69.13.39.34:7077                \
+#-----------------------------------------------------------------------------------#
+OUTPUT_PREFIX='/home/data/1'
 #-----------------------------------------------------------------------------------#
   if [ "$1" == "0" ] 2>/dev/null; then
     echo "sbt clean && sbt package"
@@ -11,11 +11,12 @@ mkdir -p $OUTPUT_PREFIX
 
 #-----------------------------------------------------------------------------------#
 elif [ "$1" == "1" ] 2>/dev/null; then
+rm -fR $OUTPUT_PREFIX &&  mkdir -p $OUTPUT_PREFIX
 echo "$(date +"%Y-%m-%d %H:%M") - SPARK JOB1 STARTED" >> spark.log
 
 spark-submit                                        \
   --class "YoutubeVideos"                           \
-  --master local[16]                                \
+  --master spark://69.13.39.34:7077                 \
   --driver-memory   32G                             \
   --executor-memory 16G                             \
   target/scala-2.11/spark-cassandra_2.11-1.0.jar    \

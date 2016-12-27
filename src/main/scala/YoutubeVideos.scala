@@ -135,16 +135,14 @@ object YoutubeVideos {
         val spark = SparkSession.builder().appName("YoutubeVideos").config("spark.some.config.option", "some-value").getOrCreate()
             import spark.implicits._
 
-            val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load().toDF()
             //val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load()
+            val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load().toDF()
             df1.printSchema()
 
-/*
-            df1.createOrReplaceTempView("video")
+/*          df1.createOrReplaceTempView("video")
             val video1 = spark.sql("SELECT video_id, video_title, channel_id, channel_text, channel_title, duration, stats_comments, stats_dislikes, stats_favorite," +
                     " stats_likes, stats_views, topics, topics_relevant, ts_video_published, video_category_id, video_language, " +
-                    " video_seconds, video_tags, video_text FROM video WHERE video_title IS NOT NULL LIMIT 100").toDF()
-*/
+                    " video_seconds, video_tags, video_text FROM video WHERE video_title IS NOT NULL LIMIT 100").toDF() */
 
             val video2 = df1.withColumn("hashtags", user_defined_function (
                         col("ts_video_published"), 
@@ -154,10 +152,9 @@ object YoutubeVideos {
                         ))
             //https://spark.apache.org/docs/2.0.0/api/java/org/apache/spark/sql/Row.html
             video2.map(t =>  
-                    "video_id="         + t.getAs[String]("video_id")                    + "\n" + 
-                    "video_title="      + ( if(t.isNullAt(32)) "Empty Title" else t(32) )  + "\n" + 
-                    //"video_title="      + ( if(t(1).isNullAt(1)) "Empty Title" else t(1) )  + "\n" + 
-                    //"video_title="    + t.getAs[String]("video_text")                                     + "\n" +
+                    "video_id="         + t.getAs[String]("video_id")                       + "\n" + 
+                    "video_title="      + ( if(t.isNullAt(32)) "missing title" else t(32) ) + "\n" + 
+                    "video_text="       + ( if(t.isNullAt(31)) "missing description" else t.getAs[String]("video_text").replaceAll("(\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") ) + "\n" +
                     //"video_text="     + t.getAs[String]("video_text").replaceAll("(\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") + "\n"
                     "hashtags="         + t.getAs[String]("hashtags")                                       + "\n" 
                     ).collect().map(_.trim).foreach( row => { 
