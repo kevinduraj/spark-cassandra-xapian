@@ -103,7 +103,7 @@ object YoutubeVideos {
             val random  = scala.util.Random
             try {
                 if(total_rank <  10) { total_rank = random.nextInt(10)        }
-                if(total_rank > 200) { total_rank = 191 + random.nextInt(10)  }
+                if(total_rank > 199) { total_rank = 191 + random.nextInt(10)  }
             } catch {  case e: Exception => { total_rank = random.nextInt(10)  }  }
 
             "xrank" + total_rank.toInt.toString() + " " +  resPeriod + " days" + period.toInt.toString() + " "
