@@ -100,8 +100,8 @@ object YoutubeVideos {
             } catch { case e: Exception => { resPeriod = "over3years" } } 
 
             /*--------------------- [ Normalize Result ] -----------------------------*/
+            val random  = scala.util.Random
             try {
-                val random  = scala.util.Random
                 if(total_rank <  10) { total_rank = random.nextInt(10)        }
                 if(total_rank > 200) { total_rank = 191 + random.nextInt(10)  }
             } catch {  case e: Exception => { total_rank = random.nextInt(10)  }  }
