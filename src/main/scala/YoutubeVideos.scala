@@ -68,6 +68,7 @@ object YoutubeVideos {
     val user_defined_function = udf(( 
                 published_at:   String, 
                 scoreLikes:     String, 
+                scoreDislikes:  String, 
                 scoreViews:     String,
                 seconds:        String
                 ) => { 
@@ -109,8 +110,10 @@ object YoutubeVideos {
                 /* views: 
                         
                 */
-                total_rank += scoreViews.toInt / 200 
-                total_rank += scoreLikes.toInt / 100 
+                total_rank += scoreViews.toInt   / 300 
+                total_rank += scoreLikes.toInt   / 200 
+                total_ranl -= scoreDislike.toInt / 100
+
                 absolute_rank = total_rank
 
             } catch { case e: Exception => { resPeriod = "over3years" } } 
@@ -182,6 +185,7 @@ object YoutubeVideos {
             val video = df1.withColumn("hashtags", user_defined_function (
                         col("ts_video_published"), 
                         col("stats_likes"),
+                        col("stats_dislikes"),
                         col("stats_views"),  
                         col("video_seconds")
                         ))
