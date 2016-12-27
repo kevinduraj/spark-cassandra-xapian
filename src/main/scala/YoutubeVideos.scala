@@ -97,8 +97,14 @@ object YoutubeVideos {
                 if(period <= 14)          { resPeriod = resPeriod + " up2weeks" }
                 if(period <= 7)           { resPeriod = resPeriod + " up1week"  }
    
-                //days: (365 * 5) / 200 = 9.125 
-                total_rank = 200 - ( period.toInt / 9 ) 
+                /* days: 
+                         (365 * 1)  / 200 = 1.825 |  200 - (1000 / 1.825)  = -347 
+                         (365 * 2)  / 200 = 3.65  |  200 - (1000 / 3.65)   = - 73 
+                         (365 * 3)  / 200 = 5.475 |  200 - (1000 / 5.475)  =   17 
+                         (365 * 5)  / 200 = 9.125 |  200 - (1000 / 9.125)  =   90
+                         (365 * 10) / 200 = 18.25 |  200 - (1000 / 18.25 ) =  145
+                */
+                total_rank = 200 - ( period.toInt / 5 ) 
 
                 //views: (10000 ) / 200 = 50
                 total_rank += scoreViews.toInt / 50
@@ -179,14 +185,15 @@ object YoutubeVideos {
                         ))
             //https://spark.apache.org/docs/2.0.0/api/java/org/apache/spark/sql/Row.html
             video.map(t =>  
-                    "video_id="         + t.getAs[String]("video_id")                       + "\n" + 
-                    "video_title="      + ( if(t.isNullAt(32)) "missing title" else t(32) ) + "\n" +                   
-                    "video_text="       + ( if(t.isNullAt(31)) "missing description" else t.getAs[String]("video_text").replaceAll("(\\t|\\R|\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") ) + "\n" +
-                    "video_tags="       + ( if(t.isNullAt(30)) "missing tags" else t.getAs[String]("video_tags").replaceAll("(\\[|\\])", " ") ) + "\n" +
-                    "stats_likes="      + ( if(t.isNullAt(19)) "0" else t(19) ) + "\n" +                   
-                    "stats_views="      + ( if(t.isNullAt(20)) "0" else t(20) ) + "\n" +                   
-                    "video_seconds="    + ( if(t.isNullAt(29)) "0" else t(29) ) + "\n" +                   
-                    "hashtags="         + t.getAs[String]("hashtags")           + "\n" 
+                    "video_id="             + t.getAs[String]("video_id")                       + "\n" + 
+                    "video_title="          + ( if(t.isNullAt(32)) "missing title" else t(32) ) + "\n" +                   
+                    "video_text="           + ( if(t.isNullAt(31)) "missing description" else t.getAs[String]("video_text").replaceAll("(\\t|\\R|\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") ) + "\n" +
+                    "video_tags="           + ( if(t.isNullAt(30)) "missing tags" else t.getAs[String]("video_tags").replaceAll("(\\[|\\])", " ") ) + "\n" +
+                    "stats_likes="          + ( if(t.isNullAt(19)) "0" else t(19) ) + "\n" +                   
+                    "stats_views="          + ( if(t.isNullAt(20)) "0" else t(20) ) + "\n" +                   
+                    "video_seconds="        + ( if(t.isNullAt(29)) "0" else t(29) ) + "\n" +                   
+                    "ts_video_published="   + ( if(t.isNullAt(25)) "0" else t(25) ) + "\n" +                   
+                    "hashtags="             + t.getAs[String]("hashtags")           + "\n" 
                     ).collect().map(_.trim).foreach( row => { 
 
                         var mapFile = 0
