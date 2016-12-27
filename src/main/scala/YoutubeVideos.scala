@@ -105,7 +105,7 @@ object YoutubeVideos {
                          (365 * 5)  / 200 = 9.125 |  200 - (1000 / 9.125)  =   90
                          (365 * 10) / 200 = 18.25 |  200 - (1000 / 18.25 ) =  145
                 */
-                total_rank = 200 - ( period.toInt / 4 ) 
+                total_rank = 200 - ( period.toInt / 3 ) 
 
                 /* views: 
                         
