@@ -15,7 +15,7 @@ OUTPUT_PREFIX='/home/data/1'
 elif [ "$1" == "1" ] 2>/dev/null; then
 rm -fR $OUTPUT_PREFIX 
 mkdir -p $OUTPUT_PREFIX
-echo "$(date +"%Y-%m-%d %H:%M") - SPARK JOB1 STARTED" >> spark.log
+echo "$(date +"%Y-%m-%d %H:%M") - SPARK JOB1 STARTED" > spark.log
 
 spark-submit                                        \
   --class "YoutubeVideos"                           \
