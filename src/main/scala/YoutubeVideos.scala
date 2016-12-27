@@ -106,8 +106,10 @@ object YoutubeVideos {
                 */
                 total_rank = 200 - ( period.toInt / 5 ) 
 
-                //views: (10000 ) / 200 = 50
-                total_rank += scoreViews.toInt / 50
+                /* views: 
+                        
+                */
+                total_rank += scoreViews.toInt / 100 
                 total_rank += scoreLikes.toInt / 50
                 absolute_rank = total_rank
 
