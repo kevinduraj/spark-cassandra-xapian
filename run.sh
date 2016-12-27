@@ -5,7 +5,7 @@
 #  --driver-memory   32G                            \
 #  --executor-memory 16G                            \
 #-----------------------------------------------------------------------------------#
-OUTPUT_PREFIX='/home/data/3'
+OUTPUT_PREFIX='/home/data/5'
 #-----------------------------------------------------------------------------------#
   if [ "$1" == "0" ] 2>/dev/null; then
     echo "sbt clean && sbt package"

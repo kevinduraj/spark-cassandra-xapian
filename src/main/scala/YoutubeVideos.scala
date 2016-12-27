@@ -200,6 +200,7 @@ object YoutubeVideos {
                     "video_text="           + ( if(t.isNullAt(31)) "missing description" else t.getAs[String]("video_text").replaceAll("(\\t|\\R|\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") ) + "\n" +
                     "video_tags="           + ( if(t.isNullAt(30)) "missing tags" else t.getAs[String]("video_tags").replaceAll("(\\[|\\])", " ") ) + "\n" +
                     "stats_likes="          + ( if(t.isNullAt(19)) "0" else t(19) ) + "\n" +                   
+                    "stats_dislikes="       + ( if(t.isNullAt(17)) "0" else t(17) ) + "\n" +                   
                     "stats_views="          + ( if(t.isNullAt(20)) "0" else t(20) ) + "\n" +                   
                     "video_seconds="        + ( if(t.isNullAt(29)) "0" else t(29) ) + "\n" +                   
                     "ts_video_published="   + ( if(t.isNullAt(25)) "2000-01-01" else t(25).toString.take(10)  ) + "\n" +                   
