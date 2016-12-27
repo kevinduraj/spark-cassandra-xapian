@@ -29,7 +29,7 @@ import scala.util.matching.Regex
  /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 object YoutubeVideos {
 
-    val TOTAL_INDEXES = 100
+    val TOTAL_INDEXES = 200
     var batchFiles = new ListBuffer[BufferedWriter]() 
     val locale = new java.util.Locale("us", "US")
     val formatter = java.text.NumberFormat.getIntegerInstance(locale)
@@ -67,9 +67,10 @@ object YoutubeVideos {
     /*----------------------------------------------------------------------------------------------------------------------------*/
     val user_defined_function = udf(( 
                 published_at:   String, 
-                duration:       String,
-                NDEXESscoreLikes:     String,
-                scoreViews:     String ) => { 
+                scoreLikes:     String, 
+                scoreViews:     String,
+                seconds:        String
+                ) => { 
 
             var resPeriod   = "up3years"
             var period      = 0.0
@@ -94,7 +95,7 @@ object YoutubeVideos {
                 if(period <= 14)          { resPeriod = resPeriod + " up2weeks" }
                 if(period <= 7)           { resPeriod = resPeriod + " up1week"  }
     
-                total_rank = 100 - squareRoot(period.toInt) 
+                total_rank = TOTAL_INDEXES - squareRoot(period.toInt + scoreLikes + scoreViews) 
 
             } catch { case e: Exception => { resPeriod = "over3years" } } 
 
@@ -150,27 +151,30 @@ object YoutubeVideos {
             //val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load()
             val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load().toDF()
             //val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" ))
-            val df2 = df1.filter(df1.col("video_title").isNotNull())
-            df2.printSchema()
+            //val df2 = df1.filter(df1.col("video_title").isNotNull())
+            df1.printSchema()
 
 /*          df1.createOrReplaceTempView("video")
             val video1 = spark.sql("SELECT video_id, video_title, channel_id, channel_text, channel_title, duration, stats_comments, stats_dislikes, stats_favorite," +
                     " stats_likes, stats_views, topics, topics_relevant, ts_video_published, video_category_id, video_language, " +
                     " video_seconds, video_tags, video_text FROM video WHERE video_title IS NOT NULL LIMIT 100").toDF() */
 
-            val video = df2.withColumn("hashtags", user_defined_function (
+            val video = df1.withColumn("hashtags", user_defined_function (
                         col("ts_video_published"), 
-                        col("duration"), 
                         col("stats_likes"),
-                        col("stats_views")  
+                        col("stats_views"),  
+                        col("video_seconds")
                         ))
             //https://spark.apache.org/docs/2.0.0/api/java/org/apache/spark/sql/Row.html
             video.map(t =>  
                     "video_id="         + t.getAs[String]("video_id")                       + "\n" + 
-                    "video_title="      + ( if(t.isNullAt(32)) "missing title" else t(32) ) + "\n" + 
-                    "video_text="       + ( if(t.isNullAt(31)) "missing description" else t.getAs[String]("video_text").replaceAll("(\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") ) + "\n" +
-                    "video_tags="       + ( if(t.isNullAt(30)) "missing tags" else t.getAs[String]("video_tags") ) + "\n" +
-                    "hashtags="         + t.getAs[String]("hashtags")                                              + "\n" 
+                    "video_title="      + ( if(t.isNullAt(32)) "missing title" else t(32) ) + "\n" +                   
+                    "video_text="       + ( if(t.isNullAt(31)) "missing description" else t.getAs[String]("video_text").replaceAll("(\\t|\\R|\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") ) + "\n" +
+                    "video_tags="       + ( if(t.isNullAt(30)) "missing tags" else t.getAs[String]("video_tags").replaceAll("(\\[|\\])") ) + "\n" +
+                    "stats_likes="      + ( if(t.isNullAt(19)) "0" else t(19) ) + "\n" +                   
+                    "stats_views="      + ( if(t.isNullAt(20)) "0" else t(20) ) + "\n" +                   
+                    "video_seconds="    + ( if(t.isNullAt(29)) "0" else t(29) ) + "\n" +                   
+                    "hashtags="         + t.getAs[String]("hashtags")           + "\n" 
                     ).collect().map(_.trim).foreach( row => { 
 
                         var mapFile = 0
