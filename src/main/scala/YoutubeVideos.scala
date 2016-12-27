@@ -61,11 +61,35 @@ object YoutubeVideos {
                 scoreLikes:     String,
                 scoreViews:     String ) => { 
 
+            var resPeriod   = "up3years"
+            var period      = 0.0
+
+            try {
+            val beginDate   = published_at.toString.take(10)                                                                                                                                                                               
+            val dateFormat  = new SimpleDateFormat("yyyy-MM-dd");
+            val date        = new Date();
+            val currentDate = dateFormat.format(date)
+
+            val formatter   = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            val oldDate     = LocalDate.parse(beginDate, formatter)
+            val newDate     = LocalDate.parse(currentDate, formatter)
+            period          = newDate.toEpochDay() - oldDate.toEpochDay()
+
+            if(period > (365*3))      { resPeriod = "over3years";           }   
+            else if(period > (365*2)) { resPeriod = "up3years";             }   
+            else if(period > (365))   { resPeriod = "up2years up3years";    }   
+            else                      { resPeriod = "up1year up3years";     }   
+
+            if(period <= 30)          { resPeriod = resPeriod + " up1month" }
+            if(period <= 14)          { resPeriod = resPeriod + " up2weeks" }
+            if(period <= 7)           { resPeriod = resPeriod + " up1week"  }
+
+            } catch { case e: Exception => { resPeriod = "over3years" } } 
+
     /*--------------------- [ Normalize Result ] -----------------------------*/
     val random  = scala.util.Random
-    var totalRank = random.nextInt(100)
-    "xrank" + totalRank.toInt.toString() + " "
-
+        var totalRank = random.nextInt(100)
+        "xrank" + totalRank.toInt.toString() + " " +  resPeriod + " days" + period.toInt.toString() + " "
     })
 
     /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -83,7 +107,7 @@ object YoutubeVideos {
 
             val video1 = spark.sql("SELECT  video_id, channel_id, channel_text, channel_title, duration, stats_comments, stats_dislikes, stats_favorite," +
                     " stats_likes, stats_views, topics, topics_relevant, ts_video_published, video_category_id, video_language, " +
-                    " video_seconds, video_tags, video_text, video_title FROM video WHERE video_title IS NOT NULL").toDF()
+                    " video_seconds, video_tags, video_text, video_title FROM video WHERE video_title IS NOT NULL LIMIT 100").toDF()
 
             val video2 = df1.withColumn("hashtags", user_defined_function (
                         col("ts_video_published"), 
@@ -93,16 +117,19 @@ object YoutubeVideos {
                         ))
 
             video2.map(t =>  
-                    "video_id="          + t.getAs[String]("video_id")                                       + "\n" 
-                    //"video_title="       + t.getAs[String]("video_text")                                     + "\n" +
-                    //"video_text="        + t.getAs[String]("video_text").replaceAll("(\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") + "\n"
+                    "video_id="         + t.getAs[String]("video_id")                                       + "\n" + 
+                    //"video_title="    + t.getAs[String]("video_text")                                     + "\n" +
+                    //"video_text="     + t.getAs[String]("video_text").replaceAll("(\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") + "\n"
+                    "hashtags="         + t.getAs[String]("hashtags")                                       + "\n" 
                     ).collect().map(_.trim).foreach( row => { 
 
                         var mapFile = 0
 
                         // hashtags=85 over3years days1124 2c2ee 6429f 68876 0dd8f 0e88c ae363
                         try {
-                        val date: Option[String] = pattern.findFirstIn(row) 
+                        val date: Option[String] = pattern.findFirstIn(row)
+                        println(date)
+
                         val rankFile = date.map(_.split(" ").toList)
                         val temp  = rankFile.get(0).substring(14)
                         mapFile   = temp.toInt
