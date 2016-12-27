@@ -20,7 +20,7 @@ echo "$(date +"%Y-%m-%d %H:%M") - SPARK JOB1 STARTED" > spark.log
 time spark-submit                                   \
   --class "YoutubeVideos"                           \
   --master local[16]                                \
-  --driver-memory   32g                             \
+  --driver-memory   64g                             \
   --executor-memory 4g                              \
   target/scala-2.11/spark-cassandra_2.11-1.0.jar    \
   "export_data"                                     \

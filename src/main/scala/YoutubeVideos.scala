@@ -112,7 +112,7 @@ object YoutubeVideos {
                 */
                 total_rank += scoreViews.toInt   / 500 
                 total_rank += scoreLikes.toInt   / 200 
-                total_rank -= scoreDislike.toInt / 100
+                total_rank -= scoreDislikes.toInt / 100
 
                 absolute_rank = total_rank
 
@@ -168,7 +168,12 @@ object YoutubeVideos {
 
         val pattern = new Regex("hashtags=\\w+ \\w+ \\w+")
 
-        val spark = SparkSession.builder().appName("YoutubeVideos").config("spark.some.config.option", "some-value").getOrCreate()
+        val warehouseLocation = "file:${system:user.dir}/spark-warehouse"
+        val spark = SparkSession.builder().appName("YoutubeVideos").config("spark.sql.warehouse.dir", warehouseLocation).getOrCreate()
+            //spark.conf.set("spark.sql.shuffle.partitions", "16")
+            spark.conf.set("spark.kryoserializer.buffer.max","64m")
+            spark.conf.set("spark.driver.maxResultSize", "32g")
+            spark.conf.set("spark.executor.memory", "4g")
             import spark.implicits._
 
             //val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load()
