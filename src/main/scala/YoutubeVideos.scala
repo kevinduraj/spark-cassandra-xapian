@@ -105,9 +105,9 @@ object YoutubeVideos {
             df1.printSchema()
             df1.createOrReplaceTempView("video")
 
-            val video1 = spark.sql("SELECT  video_id, channel_id, channel_text, channel_title, duration, stats_comments, stats_dislikes, stats_favorite," +
+            val video1 = spark.sql("SELECT  video_id, video_title, channel_id, channel_text, channel_title, duration, stats_comments, stats_dislikes, stats_favorite," +
                     " stats_likes, stats_views, topics, topics_relevant, ts_video_published, video_category_id, video_language, " +
-                    " video_seconds, video_tags, video_text, video_title FROM video WHERE video_title IS NOT NULL LIMIT 100").toDF()
+                    " video_seconds, video_tags, video_text FROM video WHERE video_title IS NOT NULL LIMIT 100").toDF()
 
             val video2 = df1.withColumn("hashtags", user_defined_function (
                         col("ts_video_published"), 
@@ -117,7 +117,9 @@ object YoutubeVideos {
                         ))
 
             video2.map(t =>  
-                    "video_id="         + t.getAs[String]("video_id")                                       + "\n" + 
+                    "video_id="         + ( if(t(1) == null) "Missing" else t(1) )  + "\n" + 
+                    "video_title="      + ( if(t(2) == null) "Empty Title" else t(2) )  + "\n" + 
+                    //"video_id="         + t.getAs[String]("video_id")                                       + "\n" + 
                     //"video_title="    + t.getAs[String]("video_text")                                     + "\n" +
                     //"video_text="     + t.getAs[String]("video_text").replaceAll("(\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") + "\n"
                     "hashtags="         + t.getAs[String]("hashtags")                                       + "\n" 
