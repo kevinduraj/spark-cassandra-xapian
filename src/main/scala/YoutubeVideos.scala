@@ -72,9 +72,11 @@ object YoutubeVideos {
                 seconds:        String
                 ) => { 
 
-            var resPeriod   = "up3years"
-            var period      = 0.0
-            var total_rank  = 0
+            var resPeriod     = "up3years"
+            var period        = 0.0
+            var total_rank    = 0
+            var absolute_rank = 0
+
             try {
                 val beginDate   = published_at.toString.take(10)                                                                                                                                                                               
                 val dateFormat  = new SimpleDateFormat("yyyy-MM-dd");
@@ -101,17 +103,18 @@ object YoutubeVideos {
                 //views: (10000 ) / 200 = 50
                 total_rank += scoreViews.toInt / 50
                 total_rank += scoreLikes.toInt / 50
+                absolute_rank = total_rank
 
             } catch { case e: Exception => { resPeriod = "over3years" } } 
 
             /*--------------------- [ Normalize Result ] -----------------------------*/
             val random  = scala.util.Random
             try {
-                if(total_rank <  10) { total_rank = random.nextInt(10)        }
+                //if(total_rank <  10) { total_rank = random.nextInt(10)        }
                 if(total_rank > 199) { total_rank = 191 + random.nextInt(10)  }
             } catch {  case e: Exception => { total_rank = random.nextInt(10)  }  }
 
-            "xrank" + total_rank.toInt.toString() + " " +  resPeriod + " days" + period.toInt.toString() + " "
+            "xrank" + total_rank.toInt.toString() + " " +  resPeriod + " days" + period.toInt.toString() + " absolute" + absolute_rank.toInt.toString()
     })
 
     /*---------------------------------------------------------------------------------------------------------------------------------------------------
