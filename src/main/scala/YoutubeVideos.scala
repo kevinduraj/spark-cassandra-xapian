@@ -110,9 +110,9 @@ object YoutubeVideos {
                 /* views: 
                         
                 */
-                total_rank += scoreViews.toInt   / 300 
+                total_rank += scoreViews.toInt   / 500 
                 total_rank += scoreLikes.toInt   / 200 
-                total_ranl -= scoreDislike.toInt / 100
+                total_rank -= scoreDislike.toInt / 100
 
                 absolute_rank = total_rank
 
