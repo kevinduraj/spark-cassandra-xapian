@@ -43,7 +43,7 @@ object YoutubeVideos {
         val output_prefix   = args(1); println("output_prefix=" + output_prefix)
 
         /*--- Open 100 ranked batchFiles with append flag set to true, ---*/
-        for(io <- 0 to 100) { batchFiles +=  new BufferedWriter(new FileWriter(new File(output_prefix + "/video_" + io +".dat"), true)) }
+        for(io <- 0 to 10) { batchFiles +=  new BufferedWriter(new FileWriter(new File(output_prefix + "/video_" + io +".dat"), true)) }
 
         if(args(0) == "export_data") {
             export_data();
@@ -52,7 +52,7 @@ object YoutubeVideos {
         }
 
         /*--- Close ranking batchFiles ---*/
-        for(ic <- 0 to 100) { batchFiles(ic).close() }
+        for(ic <- 0 to 10) { batchFiles(ic).close() }
     }
     /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
     val user_defined_function = udf(( 
@@ -88,11 +88,46 @@ object YoutubeVideos {
 
     /*--------------------- [ Normalize Result ] -----------------------------*/
     val random  = scala.util.Random
-        var totalRank = random.nextInt(100)
+        var totalRank = random.nextInt(10)
         "xrank" + totalRank.toInt.toString() + " " +  resPeriod + " days" + period.toInt.toString() + " "
     })
 
-    /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
+    /*---------------------------------------------------------------------------------------------------------------------------------------------------
+        root
+     00    |-- video_id: string (nullable = true)
+     01    |-- caption: string (nullable = true)
+     02    |-- channel_id: string (nullable = true)
+     03    |-- channel_text: string (nullable = true)
+     04    |-- channel_title: string (nullable = true)
+     05    |-- definition: string (nullable = true)
+     06    |-- dimension: string (nullable = true)
+     07    |-- duration: string (nullable = true)
+     08    |-- etag: string (nullable = true)
+     09    |-- kind: string (nullable = true)
+     10    |-- projection: string (nullable = true)
+     11    |-- safe_alcohol: boolean (nullable = true)
+     12    |-- safe_blocked: string (nullable = true)
+     13    |-- safe_game_rating: string (nullable = true)
+     14    |-- safe_rating: string (nullable = true)
+     15    |-- safe_restricted: boolean (nullable = true)
+     16    |-- stats_comments: long (nullable = true)
+     17    |-- stats_dislikes: long (nullable = true)
+     18    |-- stats_favorite: long (nullable = true)
+     19    |-- stats_likes: long (nullable = true)
+     20    |-- stats_views: long (nullable = true)
+     21    |-- topics: string (nullable = true)
+     22    |-- topics_relevant: string (nullable = true)
+     23    |-- ts_data_update: timestamp (nullable = true)
+     24    |-- ts_stats_update: timestamp (nullable = true)
+     25    |-- ts_video_published: timestamp (nullable = true)
+     26    |-- video_category_id: string (nullable = true)
+     27    |-- video_language: string (nullable = true)
+     28    |-- video_license: boolean (nullable = true)
+     29    |-- video_seconds: integer (nullable = true)
+     30    |-- video_tags: string (nullable = true)
+     31    |-- video_text: string (nullable = true)
+     32    |-- video_title: string (nullable = true) 
+    */
     def export_data() {
 
         val pattern = new Regex("hashtags=\\w+ \\w+ \\w+")
@@ -100,14 +135,16 @@ object YoutubeVideos {
         val spark = SparkSession.builder().appName("YoutubeVideos").config("spark.some.config.option", "some-value").getOrCreate()
             import spark.implicits._
 
-            //val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load().toDF()
-            val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load()
+            val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load().toDF()
+            //val df1 = spark.read.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "video2", "keyspace" -> "youtube" )).load()
             df1.printSchema()
-            df1.createOrReplaceTempView("video")
 
-            val video1 = spark.sql("SELECT  video_id, video_title, channel_id, channel_text, channel_title, duration, stats_comments, stats_dislikes, stats_favorite," +
+/*
+            df1.createOrReplaceTempView("video")
+            val video1 = spark.sql("SELECT video_id, video_title, channel_id, channel_text, channel_title, duration, stats_comments, stats_dislikes, stats_favorite," +
                     " stats_likes, stats_views, topics, topics_relevant, ts_video_published, video_category_id, video_language, " +
                     " video_seconds, video_tags, video_text FROM video WHERE video_title IS NOT NULL LIMIT 100").toDF()
+*/
 
             val video2 = df1.withColumn("hashtags", user_defined_function (
                         col("ts_video_published"), 
@@ -115,11 +152,11 @@ object YoutubeVideos {
                         col("stats_likes"),
                         col("stats_views")  
                         ))
-
+            //https://spark.apache.org/docs/2.0.0/api/java/org/apache/spark/sql/Row.html
             video2.map(t =>  
-                    "video_id="         + ( if(t(1) == null) "Missing" else t(1) )  + "\n" + 
-                    "video_title="      + ( if(t(2) == null) "Empty Title" else t(2) )  + "\n" + 
-                    //"video_id="         + t.getAs[String]("video_id")                                       + "\n" + 
+                    "video_id="         + t.getAs[String]("video_id")                    + "\n" + 
+                    "video_title="      + ( if(t.isNullAt(32)) "Empty Title" else t(32) )  + "\n" + 
+                    //"video_title="      + ( if(t(1).isNullAt(1)) "Empty Title" else t(1) )  + "\n" + 
                     //"video_title="    + t.getAs[String]("video_text")                                     + "\n" +
                     //"video_text="     + t.getAs[String]("video_text").replaceAll("(\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") + "\n"
                     "hashtags="         + t.getAs[String]("hashtags")                                       + "\n" 
@@ -130,7 +167,7 @@ object YoutubeVideos {
                         // hashtags=85 over3years days1124 2c2ee 6429f 68876 0dd8f 0e88c ae363
                         try {
                         val date: Option[String] = pattern.findFirstIn(row)
-                        println(date)
+                        // DEBUG println(date)
 
                         val rankFile = date.map(_.split(" ").toList)
                         val temp  = rankFile.get(0).substring(14)

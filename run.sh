@@ -1,7 +1,9 @@
 #!/bin/bash
 #-----------------------------------------------------------------------------------#
-OUTPUT_PREFIX='/home/data'
-
+OUTPUT_PREFIX='/home/data/2'
+rm -fR $OUTPUT_PREFIX
+sleep 1
+mkdir -p $OUTPUT_PREFIX
 #-----------------------------------------------------------------------------------#
   if [ "$1" == "0" ] 2>/dev/null; then
     echo "sbt clean && sbt package"
