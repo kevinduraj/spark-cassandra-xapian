@@ -29,6 +29,7 @@ import scala.util.matching.Regex
  /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
 object YoutubeVideos {
 
+    val TOTAL_INDEXES = 100
     var batchFiles = new ListBuffer[BufferedWriter]() 
     val locale = new java.util.Locale("us", "US")
     val formatter = java.text.NumberFormat.getIntegerInstance(locale)
@@ -43,7 +44,7 @@ object YoutubeVideos {
         val output_prefix   = args(1); println("output_prefix=" + output_prefix)
 
         /*--- Open 100 ranked batchFiles with append flag set to true, ---*/
-        for(io <- 0 to 10) { batchFiles +=  new BufferedWriter(new FileWriter(new File(output_prefix + "/video_" + io +".dat"), true)) }
+        for(io <- 0 to TOTAL_INDEXES) { batchFiles +=  new BufferedWriter(new FileWriter(new File(output_prefix + "/video_" + io +".dat"), true)) }
 
         if(args(0) == "export_data") {
             export_data();
@@ -52,44 +53,55 @@ object YoutubeVideos {
         }
 
         /*--- Close ranking batchFiles ---*/
-        for(ic <- 0 to 10) { batchFiles(ic).close() }
+        for(ic <- 0 to TOTAL_INDEXES) { batchFiles(ic).close() }
     }
-    /*---------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+    /*----------------------------------------------------------------------------------------------------------------------------*/
+    def squareRoot(a: Int): Int = {
+      val sqrt = math.sqrt(a)
+      if (sqrt % 1 == 0)
+        sqrt.toInt
+      else
+        0
+    }    
+    /*----------------------------------------------------------------------------------------------------------------------------*/
     val user_defined_function = udf(( 
                 published_at:   String, 
                 duration:       String,
-                scoreLikes:     String,
+                NDEXESscoreLikes:     String,
                 scoreViews:     String ) => { 
 
             var resPeriod   = "up3years"
             var period      = 0.0
-
+            var total_rank  = 0
             try {
-            val beginDate   = published_at.toString.take(10)                                                                                                                                                                               
-            val dateFormat  = new SimpleDateFormat("yyyy-MM-dd");
-            val date        = new Date();
-            val currentDate = dateFormat.format(date)
+                val beginDate   = published_at.toString.take(10)                                                                                                                                                                               
+                val dateFormat  = new SimpleDateFormat("yyyy-MM-dd");
+                val date        = new Date();
+                val currentDate = dateFormat.format(date)
 
-            val formatter   = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-            val oldDate     = LocalDate.parse(beginDate, formatter)
-            val newDate     = LocalDate.parse(currentDate, formatter)
-            period          = newDate.toEpochDay() - oldDate.toEpochDay()
+                val formatter   = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                val oldDate     = LocalDate.parse(beginDate, formatter)
+                val newDate     = LocalDate.parse(currentDate, formatter)
+                period          = newDate.toEpochDay() - oldDate.toEpochDay()
 
-            if(period > (365*3))      { resPeriod = "over3years";           }   
-            else if(period > (365*2)) { resPeriod = "up3years";             }   
-            else if(period > (365))   { resPeriod = "up2years up3years";    }   
-            else                      { resPeriod = "up1year up3years";     }   
+                if(period > (365*3))      { resPeriod = "over3years";           }   
+                else if(period > (365*2)) { resPeriod = "up3years";             }   
+                else if(period > (365))   { resPeriod = "up2years up3years";    }   
+                else                      { resPeriod = "up1year up3years";     }   
 
-            if(period <= 30)          { resPeriod = resPeriod + " up1month" }
-            if(period <= 14)          { resPeriod = resPeriod + " up2weeks" }
-            if(period <= 7)           { resPeriod = resPeriod + " up1week"  }
+                if(period <= 30)          { resPeriod = resPeriod + " up1month" }
+                if(period <= 14)          { resPeriod = resPeriod + " up2weeks" }
+                if(period <= 7)           { resPeriod = resPeriod + " up1week"  }
+    
+                total_rank = 100 - squareRoot(period.toInt) 
 
             } catch { case e: Exception => { resPeriod = "over3years" } } 
 
-    /*--------------------- [ Normalize Result ] -----------------------------*/
-    val random  = scala.util.Random
-        var totalRank = random.nextInt(10)
-        "xrank" + totalRank.toInt.toString() + " " +  resPeriod + " days" + period.toInt.toString() + " "
+            /*--------------------- [ Normalize Result ] -----------------------------*/
+            val random  = scala.util.Random
+            var total_rank = random.nextInt(10)
+            "xrank" + total_rank.toInt.toString() + " " +  resPeriod + " days" + period.toInt.toString() + " "
     })
 
     /*---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -155,8 +167,8 @@ object YoutubeVideos {
                     "video_id="         + t.getAs[String]("video_id")                       + "\n" + 
                     "video_title="      + ( if(t.isNullAt(32)) "missing title" else t(32) ) + "\n" + 
                     "video_text="       + ( if(t.isNullAt(31)) "missing description" else t.getAs[String]("video_text").replaceAll("(\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") ) + "\n" +
-                    //"video_text="     + t.getAs[String]("video_text").replaceAll("(\\<|\\>|\\(|\\)|/|\"|=|-|\\\\|\\.\\.\\.|\\p{C})", " ") + "\n"
-                    "hashtags="         + t.getAs[String]("hashtags")                                       + "\n" 
+                    "video_tags="       + ( if(t.isNullAt(30)) "missing tags" else t.getAs[String]("video_tags") ) + "\n" +
+                    "hashtags="         + t.getAs[String]("hashtags")                                              + "\n" 
                     ).collect().map(_.trim).foreach( row => { 
 
                         var mapFile = 0
